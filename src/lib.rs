@@ -270,4 +270,105 @@ mod tests {
         let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n0\r\n\r\n";
         assert_eq!(decode_byte_by_byte(payload), b"Mozilla\r\nDeveloper\r\n");
     }
+
+    #[test]
+    fn binary_data_containing_cr_and_lf() {
+        // chunk-data itself contains \r and \n bytes — must not be
+        // mistaken for chunk framing.
+        let data: &[u8] = b"ab\rcd\nef";
+        let mut payload = Vec::new();
+        payload.extend_from_slice(format!("{:x}\r\n", data.len()).as_bytes());
+        payload.extend_from_slice(data);
+        payload.extend_from_slice(b"\r\n0\r\n\r\n");
+
+        let mut expected: Vec<u8> = Vec::new();
+        expected.extend_from_slice(data);
+        expected.extend_from_slice(b"\r\n");
+        assert_eq!(decode_all_at_once(&payload), expected);
+    }
+
+    #[test]
+    fn binary_data_split_around_embedded_cr() {
+        let data: &[u8] = b"12\r34\r56\r78";
+        let mut payload = Vec::new();
+        payload.extend_from_slice(format!("{:x}\r\n", data.len()).as_bytes());
+        payload.extend_from_slice(data);
+        payload.extend_from_slice(b"\r\n0\r\n\r\n");
+
+        // split right after one of the embedded \r bytes
+        let split_point = 3 + data.len() / 2;
+
+        let mut expected: Vec<u8> = Vec::new();
+        expected.extend_from_slice(data);
+        expected.extend_from_slice(b"\r\n");
+        assert_eq!(decode_split_at(&payload, split_point), expected);
+    }
+
+    #[test]
+    fn large_chunk() {
+        let mut data = vec![b'x'; 100_000];
+        let mut payload = Vec::new();
+        payload.extend_from_slice(format!("{:x}\r\n", data.len()).as_bytes());
+        payload.extend_from_slice(&data);
+        payload.extend_from_slice(b"\r\n0\r\n\r\n");
+
+        data.extend_from_slice(b"\r\n");
+        assert_eq!(decode_all_at_once(&payload), data);
+    }
+
+    #[test]
+    fn many_small_chunks() {
+        let mut payload = Vec::new();
+        let mut expected = Vec::new();
+        for i in 0..50 {
+            let piece = format!("chunk{}", i);
+            payload.extend_from_slice(format!("{:x}\r\n", piece.len()).as_bytes());
+            payload.extend_from_slice(piece.as_bytes());
+            payload.extend_from_slice(b"\r\n");
+            expected.extend_from_slice(piece.as_bytes());
+            expected.extend_from_slice(b"\r\n");
+        }
+        payload.extend_from_slice(b"0\r\n\r\n");
+
+        assert_eq!(decode_all_at_once(&payload), expected);
+    }
+
+    #[test]
+    fn invalid_hex_length_errors() {
+        let payload = b"zz\r\nhello\r\n0\r\n\r\n";
+        let mut decoder = ChunkedDecoder::new();
+        assert!(decoder.decode(payload).is_err());
+    }
+
+    #[test]
+    fn missing_lf_after_cr_errors() {
+        // \r not followed by \n after chunk size
+        let payload = b"5\rXhello\r\n0\r\n\r\n";
+        let mut decoder = ChunkedDecoder::new();
+        assert!(decoder.decode(payload).is_err());
+    }
+
+    #[test]
+    fn missing_crlf_after_chunk_data_errors() {
+        // chunk-data not followed by \r\n
+        let payload = b"5\r\nhelloXX0\r\n\r\n";
+        let mut decoder = ChunkedDecoder::new();
+        assert!(decoder.decode(payload).is_err());
+    }
+
+    #[test]
+    fn truncated_payload_no_terminator() {
+        let payload = b"5\r\nhello\r\n";
+        let mut decoder = ChunkedDecoder::new();
+        assert!(decoder.decode(payload).is_ok());
+        assert_eq!(decoder.get_processed_chunk(), b"hello\r\n");
+    }
+
+    #[test]
+    fn decode_after_terminator_does_not_hang() {
+        let mut decoder = ChunkedDecoder::new();
+        decoder.decode(b"5\r\nhello\r\n0\r\n\r\n").unwrap();
+        let result = decoder.decode(b"");
+        assert!(result.is_ok());
+    }
 }
