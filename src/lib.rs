@@ -160,4 +160,29 @@ fn find_cr(chunk: &[u8]) -> Option<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn decode_all_at_once(payload: &[u8]) -> Vec<u8> {
+        let mut decoder = ChunkedDecoder::new();
+        decoder.decode(payload).unwrap();
+        decoder.get_processed_chunk()
+    }
+
+    #[test]
+    fn single_call_whole_payload() {
+        let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n7\r\nNetwork\r\n0\r\n\r\n";
+        let result = decode_all_at_once(payload);
+        assert_eq!(result, b"Mozilla\r\nDeveloper\r\nNetwork\r\n");
+    }
+
+    #[test]
+    fn single_chunk() {
+        let payload = b"5\r\nhello\r\n0\r\n\r\n";
+        assert_eq!(decode_all_at_once(payload), b"hello\r\n");
+    }
+
+    #[test]
+    fn empty_body() {
+        let payload = b"0\r\n\r\n";
+        assert_eq!(decode_all_at_once(payload), b"");
+    }
 }
