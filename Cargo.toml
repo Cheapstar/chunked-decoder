@@ -2,5 +2,12 @@
 name = "chunked-decoder"
 version = "0.1.0"
 edition = "2024"
+description = "A streaming parser for Transfer-Encoding: chunked HTTP/1.1 and HTTPS request bodies."
+license = "Apache-2.0"
+repository = "https://github.com/Cheapstar/chunked-decoder.git"
+readme = "README.md"
+keywords = ["http", "chunked", "streaming", "parser", "decoder","Transfer-Encoding"]
+categories = ["web-programming", "parser-implementations","http-parser","http","https"]
+rust-version = "1.85"
 
 [dependencies]

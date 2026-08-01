@@ -71,3 +71,11 @@ Parsing failures are reported via `ChunkedDecoderError`:
 | `InvalidLength`          | Chunk-size must be a valid hexadecimal value    |
 | `IncorrectEncoding`      | Incorrect chunked encoding                      |
 | `MaliciousChunk`         | Chunk is not correctly encoded                  |
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+
+Copyright [2026] Cheapstar
