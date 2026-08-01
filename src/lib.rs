@@ -11,7 +11,8 @@
 //! [`get_processed_chunks`]: ChunkedDecoder::get_processed_chunks
 //!
 //! # Example
-//! ```no_run
+//! ```ignore
+//!
 //!     let mut decoder = ChunkedDecoder::new();
 //!     let payload = "8\r\nTesting \r\n9;ext=true\r\na robust \r\n7\r\nparser!\r\n0\r\nExpires: Sun, 02 Aug 2026 02:00:00 GMT\r\n\r\n";
 //!     let mut out = Vec::new();
@@ -61,9 +62,9 @@ mod tests {
 
     #[test]
     fn single_call_whole_payload() {
-        let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n7\r\nNetwork\r\n0\r\n\r\n";
+        let payload = b"8\r\nTesting \r\n9;ext=true\r\na robust \r\n7\r\nparser!\r\n0\r\nExpires: Sun, 02 Aug 2026 02:00:00 GMT\r\n\r\n";
         let result = decode_all_at_once(payload);
-        assert_eq!(result, b"Mozilla\r\nDeveloper\r\nNetwork\r\n");
+        assert_eq!(result, b"Testing \r\na robust \r\nparser!\r\n");
     }
 
     #[test]

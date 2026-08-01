@@ -108,8 +108,12 @@ impl ChunkedDecoder {
                 let newline_pos = newline_exists.unwrap();
 
                 let chunk_size_bytes = &new_chunk[index..index + newline_pos];
-                let chunk_size_str = str::from_utf8(chunk_size_bytes)
+                // chunk_size line could have extension
+                // chunk_size; ext=true;some=false\r\n
+                let chunk_size_str_with_extension = str::from_utf8(chunk_size_bytes)
                     .map_err(|_| ChunkedDecoderError::InvalidChunkSizeFormat)?;
+
+                let chunk_size_str = chunk_size_str_with_extension.split(';').next().unwrap();
                 let chunk_size = usize::from_str_radix(chunk_size_str, 16)
                     .map_err(|_| ChunkedDecoderError::InvalidLength)?;
 
