@@ -1,3 +1,31 @@
+//! / A streaming parser for `Transfer-Encoding: chunked` Https/1.1 and Https request bodies.
+//!
+//! `ChunkedDecoder` is designed to be fed data incrementally via [`decode`],
+//! rather than requiring the entire body to be loaded into memory up front.
+//! Small parts are buffered in memory and as soon as the any data is processed it
+//! can be retreived via [`get_processed_chunks`] continuously.
+//!
+//!
+//!
+//! [`decode`]: ChunkedDecoder::decode
+//! [`get_processed_chunks`]: ChunkedDecoder::get_processed_chunks
+//!
+//! # Example
+//! ```no_run
+//!     let mut decoder = ChunkedDecoder::new();
+//!     let payload = "8\r\nTesting \r\n9;ext=true\r\na robust \r\n7\r\nparser!\r\n0\r\nExpires: Sun, 02 Aug 2026 02:00:00 GMT\r\n\r\n";
+//!     let mut out = Vec::new();
+//!     // byte by byte processing
+//!     for b in payload {
+//!         decoder.decode(&[*b]).unwrap();
+//!         out.extend(decoder.get_processed_chunk());
+//!     }
+//! ```
+//!
+//! //! # Errors
+//!
+//! Parsing failures are reported via [`ChunkedDecoderError`].
+
 pub mod chunked_decoder;
 
 #[cfg(test)]

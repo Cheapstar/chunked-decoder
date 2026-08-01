@@ -30,7 +30,7 @@ pub enum ChunkedDecoderError {
     MaliciousChunk,
 }
 
-/// A streaming parser for `Transfer-Encoding: chunked` request bodies.
+/// A streaming parser for `Transfer-Encoding: chunked` Https/1.1 and Https request bodies.
 ///
 /// `ChunkedDecoder` is designed to be fed data incrementally via [`decode`],
 /// rather than requiring the entire body to be loaded into memory up front.
