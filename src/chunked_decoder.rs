@@ -35,7 +35,7 @@ pub enum ChunkedDecoderError {
 /// `ChunkedDecoder` is designed to be fed data incrementally via [`decode`],
 /// rather than requiring the entire body to be loaded into memory up front.
 /// Small parts are buffered in memory and as soon as the any data is processed it
-/// can be retreived via [`get_processed_chunks`].
+/// can be retreived via [`get_processed_chunks`] continuously.
 ///
 ///
 /// [`decode`]: ChunkedDecoder::decode
@@ -48,6 +48,8 @@ pub struct ChunkedDecoder {
 }
 
 impl ChunkedDecoder {
+    /// # Returns
+    ///     * ChunkedDecoder Instance
     pub fn new() -> Self {
         Self {
             processed_chunk: Vec::new(),
@@ -57,6 +59,27 @@ impl ChunkedDecoder {
         }
     }
 
+    /// Takes the chunk incrementally and process them for chunked-encoding
+    /// storing the processed chunks which can be retreived continuously via
+    /// [`get_processed_chunks`].
+    ///
+    /// # Arguments
+    ///  * `chunk` : chunk of body bytes to be parsed
+    ///
+    /// # Errors
+    ///     Returns `ChunkedDecoderError`
+    ///
+    /// # NOTE : This only removes the line containing `chunk_size` nothing else.
+    ///
+    ///     chunk_size\r\n                 
+    ///     chunk\r\n                        chunk\r\n
+    ///     chunk_size\r\n                   chunk\r\n
+    ///     chunk\r\n               =>       chunk\r\n
+    ///     chunk_size\r\n                   chunk\r\n
+    ///     chunk\r\n
+    ///     chunk_size\r\n
+    ///     chunk\r\n
+    ///
     pub fn decode(&mut self, chunk: &[u8]) -> Result<(), ChunkedDecoderError> {
         let mut index = 0;
         let mut new_chunk: Vec<u8> = Vec::new();
@@ -160,6 +183,10 @@ impl ChunkedDecoder {
         Ok(())
     }
 
+    /// To retreive processed chunks
+    ///
+    /// # Returns
+    ///     Vector of Processed Body Bytes.
     pub fn get_processed_chunk(&mut self) -> Vec<u8> {
         let mut ret = Vec::new();
         ret.append(&mut self.processed_chunk);
