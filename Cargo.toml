@@ -7,7 +7,7 @@ license = "Apache-2.0"
 repository = "https://github.com/Cheapstar/chunked-decoder.git"
 readme = "README.md"
 keywords = ["http", "chunked", "parser", "decoder","Transfer-Encoding"]
-categories = ["web-programming", "parser-implementations","http-parser","http","https"]
+categories = ["web-programming", "parser-implementations","http-parser"]
 rust-version = "1.85"
 
 [dependencies]
