@@ -18,6 +18,21 @@ for b in payload.as_bytes() {
 }
 ```
 
+## Installation
+
+Run:
+
+```bash
+cargo add chunked_decoder
+```
+
+Or add it to your `Cargo.toml` manually:
+
+```toml
+[dependencies]
+chunked_decoder = "0.1"
+```
+
 ## API
 
 ### `decode`
@@ -71,6 +86,10 @@ Parsing failures are reported via `ChunkedDecoderError`:
 | `InvalidLength`          | Chunk-size must be a valid hexadecimal value    |
 | `IncorrectEncoding`      | Incorrect chunked encoding                      |
 | `MaliciousChunk`         | Chunk is not correctly encoded                  |
+
+## Documentation
+
+Full API documentation is available on [docs.rs](https://docs.rs/chunked_decoder).
 
 ## License
 
