@@ -6,7 +6,7 @@ description = "A streaming parser for Transfer-Encoding: chunked HTTP/1.1 and HT
 license = "Apache-2.0"
 repository = "https://github.com/Cheapstar/chunked-decoder.git"
 readme = "README.md"
-keywords = ["http", "chunked", "streaming", "parser", "decoder","Transfer-Encoding"]
+keywords = ["http", "chunked", "parser", "decoder","Transfer-Encoding"]
 categories = ["web-programming", "parser-implementations","http-parser","http","https"]
 rust-version = "1.85"
 
