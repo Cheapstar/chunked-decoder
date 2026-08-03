@@ -82,16 +82,16 @@ impl ChunkedDecoder {
     ///
     pub fn decode(&mut self, chunk: &[u8]) -> Result<(), ChunkedDecoderError> {
         let mut index = 0;
-        let mut new_chunk: Vec<u8> = Vec::new();
 
-        if self.buffer.is_empty() {
-            new_chunk.extend_from_slice(chunk);
+        let out_buf;
+
+        let new_chunk: &[u8] = if self.buffer.is_empty() {
+            chunk
         } else {
-            new_chunk.extend_from_slice(&self.buffer);
-            new_chunk.extend_from_slice(chunk);
-
-            self.buffer.clear();
-        }
+            self.buffer.extend_from_slice(chunk);
+            out_buf = std::mem::take(&mut self.buffer);
+            &out_buf
+        };
 
         loop {
             if self.state == ChunkedDecoderState::Done {
