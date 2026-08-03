@@ -1,6 +1,6 @@
 [package]
 name = "chunked-decoder"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "A streaming parser for Transfer-Encoding: chunked HTTP/1.1 and HTTPS request bodies."
 license = "Apache-2.0"
