@@ -30,7 +30,7 @@ Or add it to your `Cargo.toml` manually:
 
 ```toml
 [dependencies]
-chunked_decoder = "0.1"
+chunked_decoder = "0.2"
 ```
 
 ## API
