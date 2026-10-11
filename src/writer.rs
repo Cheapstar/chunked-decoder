@@ -1,27 +1,21 @@
-use std::io::BufWriter;
-
 use crate::chunked_decoder::ChunkedDecoder;
 
-/// Decode the given buffer and write it to the underlying Writer
-pub struct DecoderWriter<W: std::io::Write> {
-    writer: BufWriter<W>,
+/// Decodes chunked data written to it and forwards the result to the underlying writer.
+pub struct Decoder<W: std::io::Write> {
+    writer: W,
     chunk_decoder: ChunkedDecoder,
 }
 
-impl<W: std::io::Write> DecoderWriter<W> {
+impl<W: std::io::Write> Decoder<W> {
     pub fn new(w: W) -> Self {
         Self {
-            writer: BufWriter::new(w),
+            writer: w,
             chunk_decoder: ChunkedDecoder::new(),
         }
     }
-
-    pub fn into_inner(self) -> std::io::Result<W> {
-        self.writer.into_inner().map_err(|e| e.into_error())
-    }
 }
 
-impl<W: std::io::Write> std::io::Write for DecoderWriter<W> {
+impl<W: std::io::Write> std::io::Write for Decoder<W> {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.chunk_decoder
             .decode(buf)
@@ -33,7 +27,7 @@ impl<W: std::io::Write> std::io::Write for DecoderWriter<W> {
             self.writer.write_all(&inner_buf)?;
         }
 
-        Ok(inner_buf_len)
+        Ok(buf.len())
     }
     fn flush(&mut self) -> std::io::Result<()> {
         let inner_buf_len = self.chunk_decoder.processed_chunk_length();
@@ -45,17 +39,21 @@ impl<W: std::io::Write> std::io::Write for DecoderWriter<W> {
     }
 }
 
+/// The former name of [`Decoder`].
+#[deprecated(since = "0.2.2", note = "use writer::Decoder instead")]
+pub type DecoderWriter<W> = Decoder<W>;
+
 #[cfg(test)]
 mod test {
     use std::io::Write;
 
-    use crate::writer::DecoderWriter;
+    use crate::writer::Decoder;
 
     #[test]
     fn works_correctly() {
         let payload = b"1a\r\n01234567890123456789012345\r\n0\r\n\r\n";
-        let some_writer = vec![];
-        let mut decoder_writer = DecoderWriter::new(some_writer);
+        let mut some_writer = vec![];
+        let mut decoder_writer = Decoder::new(&mut some_writer);
 
         let expected = b"01234567890123456789012345\r\n".to_vec();
 
@@ -65,8 +63,6 @@ mod test {
 
         decoder_writer.flush();
 
-        let final_writer = decoder_writer.into_inner().unwrap();
-
-        assert_eq!(final_writer, expected);
+        assert_eq!(some_writer, expected);
     }
 }

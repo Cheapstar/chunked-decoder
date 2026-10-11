@@ -35,6 +35,8 @@ chunked_decoder = "0.2"
 
 ## API
 
+The I/O adapters are `reader::Decoder` for reading a chunked body and `writer::Decoder` for decoding bytes passed to a writer. The former `DecoderReader` and `DecoderWriter` names remain as deprecated aliases.
+
 ### `decode`
 
 ```rust

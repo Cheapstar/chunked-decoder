@@ -3,7 +3,7 @@
 /// Transitions:
 /// ChunkSize -> ChunkSizeCrlf -> ChunkData -> ChunkDataCrlf -> ChunkSize -> ... -> Done
 #[derive(PartialEq)]
-enum ChunkedDecoderState {
+pub enum ChunkedDecoderState {
     /// Decoding Chunk Length
     ChunkSize,
     /// Just consumed the chunk-size line; now expecting exactly "\r\n"
@@ -211,6 +211,10 @@ impl ChunkedDecoder {
 
     pub fn processed_chunk_length(&self) -> usize {
         self.processed_chunk.len()
+    }
+
+    pub fn get_state(&self) -> &ChunkedDecoderState {
+        &self.state
     }
 }
 
