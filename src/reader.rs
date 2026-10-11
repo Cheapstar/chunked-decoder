@@ -2,7 +2,7 @@ use std::io::{BufRead, BufReader};
 
 use crate::chunked_decoder::ChunkedDecoder;
 
-/// reader from reader and parse it and then push it to the specified buffer
+/// Read from underlying reader and parse it and then push it to the specified buffer
 pub struct DecoderReader<R: std::io::Read> {
     reader: BufReader<R>,
     chunk_decoder: ChunkedDecoder,
@@ -32,8 +32,6 @@ impl<R: std::io::Read> std::io::Read for DecoderReader<R> {
             .map_err(|_| std::io::ErrorKind::Other)?;
 
         let processed_chunk = self.chunk_decoder.get_processed_chunk(Some(buf.len()));
-
-        println!("{:?}", processed_chunk);
 
         // consume the read bytes
         self.reader.consume(inner_buf_len);
