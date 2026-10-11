@@ -28,6 +28,7 @@
 //! Parsing failures are reported via [`ChunkedDecoderError`].
 
 pub mod chunked_decoder;
+pub mod reader;
 
 #[cfg(test)]
 mod tests {
@@ -37,7 +38,7 @@ mod tests {
     fn decode_all_at_once(payload: &[u8]) -> Vec<u8> {
         let mut decoder = ChunkedDecoder::new();
         decoder.decode(payload).unwrap();
-        decoder.get_processed_chunk()
+        decoder.get_processed_chunk(None)
     }
 
     fn decode_byte_by_byte(payload: &[u8]) -> Vec<u8> {
@@ -45,7 +46,7 @@ mod tests {
         let mut out = Vec::new();
         for b in payload {
             decoder.decode(&[*b]).unwrap();
-            out.extend(decoder.get_processed_chunk());
+            out.extend(decoder.get_processed_chunk(None));
         }
         out
     }
@@ -54,9 +55,9 @@ mod tests {
         let mut decoder = ChunkedDecoder::new();
         let (part1, part2) = payload.split_at(at);
         decoder.decode(part1).unwrap();
-        let mut out = decoder.get_processed_chunk();
+        let mut out = decoder.get_processed_chunk(None);
         decoder.decode(part2).unwrap();
-        out.extend(decoder.get_processed_chunk());
+        out.extend(decoder.get_processed_chunk(None));
         out
     }
 
@@ -234,7 +235,7 @@ mod tests {
         let payload = b"5\r\nhello\r\n";
         let mut decoder = ChunkedDecoder::new();
         assert!(decoder.decode(payload).is_ok());
-        assert_eq!(decoder.get_processed_chunk(), b"hello\r\n");
+        assert_eq!(decoder.get_processed_chunk(None), b"hello\r\n");
     }
 
     #[test]

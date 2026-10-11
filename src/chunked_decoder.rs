@@ -191,10 +191,26 @@ impl ChunkedDecoder {
     ///
     /// # Returns
     ///     Vector of Processed Body Bytes.
-    pub fn get_processed_chunk(&mut self) -> Vec<u8> {
-        let mut ret = Vec::new();
-        ret.append(&mut self.processed_chunk);
+    pub fn get_processed_chunk(&mut self, len: Option<usize>) -> Vec<u8> {
+        let ret_len = if len.is_none() {
+            self.processed_chunk.len()
+        } else {
+            len.unwrap()
+        };
+
+        let mut ret = Vec::with_capacity(ret_len);
+        if ret_len <= self.processed_chunk.len() {
+            let mut required_chunk: Vec<u8> = self.processed_chunk.drain(..ret_len).collect();
+            ret.append(&mut required_chunk);
+        } else {
+            ret.append(&mut self.processed_chunk);
+        }
+
         ret
+    }
+
+    pub fn processed_chunk_length(&self) -> usize {
+        self.processed_chunk.len()
     }
 }
 
