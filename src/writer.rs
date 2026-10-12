@@ -51,11 +51,11 @@ mod test {
 
     #[test]
     fn works_correctly() {
-        let payload = b"1a\r\n01234567890123456789012345\r\n0\r\n\r\n";
+        let payload = b"1a\r\n012345678901234567890123452\r\n0\r\n\r\n";
         let mut some_writer = vec![];
         let mut decoder_writer = Decoder::new(&mut some_writer);
 
-        let expected = b"01234567890123456789012345\r\n".to_vec();
+        let expected = b"012345678901234567890123452\r\n".to_vec();
 
         for iter in payload.chunks(2) {
             decoder_writer.write(iter);

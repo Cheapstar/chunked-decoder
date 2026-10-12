@@ -90,10 +90,10 @@ mod tests {
 
     #[test]
     fn lowercase_hex_length() {
-        let payload = b"1a\r\n01234567890123456789012345\r\n0\r\n\r\n";
+        let payload = b"1b\r\n012345678901234567890123452\r\n0\r\n\r\n";
         assert_eq!(
             decode_all_at_once(payload),
-            b"01234567890123456789012345\r\n"
+            b"012345678901234567890123452\r\n"
         );
     }
 
