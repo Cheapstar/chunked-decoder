@@ -1,4 +1,4 @@
-use crate::chunked_decoder::ChunkedDecoder;
+use crate::decoder::ChunkedDecoder;
 
 /// Decodes chunked data written to it and forwards the result to the underlying writer.
 pub struct Decoder<W: std::io::Write> {

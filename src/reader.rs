@@ -1,6 +1,6 @@
 use std::vec;
 
-use crate::chunked_decoder::{ChunkedDecoder, ChunkedDecoderState};
+use crate::decoder::{ChunkedDecoder, ChunkedDecoderState};
 
 /// Decodes a chunked body while reading from the underlying reader.
 pub struct Decoder<R: std::io::Read> {

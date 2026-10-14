@@ -27,14 +27,16 @@
 //!
 //! Parsing failures are reported via [`ChunkedDecoderError`].
 
-pub mod chunked_decoder;
+pub mod decoder;
+pub mod encoder;
+pub use encoder::*;
 pub mod reader;
 pub mod writer;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chunked_decoder::ChunkedDecoder;
+    use decoder::ChunkedDecoder;
 
     fn decode_all_at_once(payload: &[u8]) -> Vec<u8> {
         let mut decoder = ChunkedDecoder::new();
