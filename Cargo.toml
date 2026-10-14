@@ -1,13 +1,13 @@
 [package]
 name = "chunked-decoder"
-version = "0.2.3"
+version = "0.3.1"
 edition = "2024"
-description = "A streaming parser for Transfer-Encoding: chunked HTTP/1.1 and HTTPS request bodies."
+description = "A streaming parser/encoder for Transfer-Encoding: chunked HTTP/1.1 and HTTPS request bodies."
 license = "Apache-2.0"
 repository = "https://github.com/Cheapstar/chunked-decoder.git"
 readme = "README.md"
-keywords = ["http", "chunked", "parser", "decoder","Transfer-Encoding"]
-categories = ["web-programming", "parser-implementations"]
+keywords = ["http", "chunked", "encoder", "decoder","Transfer-Encoding"]
+categories = ["web-programming", "parser-implementations","encoder-decoder"]
 rust-version = "1.85"
 
 [dependencies]
