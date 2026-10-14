@@ -34,7 +34,7 @@ impl<R: Read> Read for Encoder<R> {
             let chunk_size_hex = if l < 10 {
                 format!("{:x}", l)
             } else {
-                format!("{:01x}", l)
+                format!("{:02x}", l)
             };
 
             let chunk_size_str_bytes = chunk_size_hex.bytes().len();
