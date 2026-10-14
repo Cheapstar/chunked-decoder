@@ -29,7 +29,6 @@
 
 pub mod decoder;
 pub mod encoder;
-pub use encoder::*;
 pub mod reader;
 pub mod writer;
 
@@ -68,13 +67,13 @@ mod tests {
     fn single_call_whole_payload() {
         let payload = b"8\r\nTesting \r\n9;ext=true\r\na robust \r\n7\r\nparser!\r\n0\r\nExpires: Sun, 02 Aug 2026 02:00:00 GMT\r\n\r\n";
         let result = decode_all_at_once(payload);
-        assert_eq!(result, b"Testing \r\na robust \r\nparser!\r\n");
+        assert_eq!(result, b"Testing a robust parser!");
     }
 
     #[test]
     fn single_chunk() {
         let payload = b"5\r\nhello\r\n0\r\n\r\n";
-        assert_eq!(decode_all_at_once(payload), b"hello\r\n");
+        assert_eq!(decode_all_at_once(payload), b"hello");
     }
 
     #[test]
@@ -87,22 +86,19 @@ mod tests {
     fn uppercase_hex_length() {
         // chunk sizes are case-insensitive hex
         let payload = b"A\r\n0123456789\r\n0\r\n\r\n";
-        assert_eq!(decode_all_at_once(payload), b"0123456789\r\n");
+        assert_eq!(decode_all_at_once(payload), b"0123456789");
     }
 
     #[test]
     fn lowercase_hex_length() {
         let payload = b"1b\r\n012345678901234567890123452\r\n0\r\n\r\n";
-        assert_eq!(
-            decode_all_at_once(payload),
-            b"012345678901234567890123452\r\n"
-        );
+        assert_eq!(decode_all_at_once(payload), b"012345678901234567890123452");
     }
 
     #[test]
     fn split_mid_chunk_data() {
         let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n7\r\nNetwork\r\n0\r\n\r\n";
-        let expected = b"Mozilla\r\nDeveloper\r\nNetwork\r\n".to_vec();
+        let expected = b"MozillaDeveloperNetwork".to_vec();
         assert_eq!(decode_split_at(payload, 10), expected);
     }
 
@@ -112,7 +108,7 @@ mod tests {
         let payload = b"1a\r\n01234567890123456789012345\r\n0\r\n\r\n";
         assert_eq!(
             decode_split_at(payload, 1),
-            b"01234567890123456789012345\r\n".to_vec()
+            b"01234567890123456789012345".to_vec()
         );
     }
 
@@ -120,21 +116,21 @@ mod tests {
     fn split_on_crlf_after_length() {
         // splits between \r and \n after "7"
         let payload = b"7\r\nMozilla\r\n0\r\n\r\n";
-        assert_eq!(decode_split_at(payload, 2), b"Mozilla\r\n".to_vec());
+        assert_eq!(decode_split_at(payload, 2), b"Mozilla".to_vec());
     }
 
     #[test]
     fn split_on_crlf_after_chunk() {
         // splits between \r and \n right after chunk data ends
         let payload = b"7\r\nMozilla\r\n0\r\n\r\n";
-        assert_eq!(decode_split_at(payload, 10), b"Mozilla\r\n".to_vec());
+        assert_eq!(decode_split_at(payload, 10), b"Mozilla".to_vec());
     }
 
     #[test]
     fn split_at_every_byte_offset() {
         // try every possible split point and confirm same result
         let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n7\r\nNetwork\r\n0\r\n\r\n";
-        let expected = b"Mozilla\r\nDeveloper\r\nNetwork\r\n".to_vec();
+        let expected = b"MozillaDeveloperNetwork".to_vec();
         for i in 1..payload.len() {
             let result = decode_split_at(payload, i);
             assert_eq!(result, expected, "failed at split offset {}", i);
@@ -145,7 +141,7 @@ mod tests {
     fn byte_by_byte_delivery() {
         // worst case: one byte per decode() call
         let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n0\r\n\r\n";
-        assert_eq!(decode_byte_by_byte(payload), b"Mozilla\r\nDeveloper\r\n");
+        assert_eq!(decode_byte_by_byte(payload), b"MozillaDeveloper");
     }
 
     #[test]
@@ -160,7 +156,6 @@ mod tests {
 
         let mut expected: Vec<u8> = Vec::new();
         expected.extend_from_slice(data);
-        expected.extend_from_slice(b"\r\n");
         assert_eq!(decode_all_at_once(&payload), expected);
     }
 
@@ -177,7 +172,6 @@ mod tests {
 
         let mut expected: Vec<u8> = Vec::new();
         expected.extend_from_slice(data);
-        expected.extend_from_slice(b"\r\n");
         assert_eq!(decode_split_at(&payload, split_point), expected);
     }
 
@@ -189,7 +183,6 @@ mod tests {
         payload.extend_from_slice(&data);
         payload.extend_from_slice(b"\r\n0\r\n\r\n");
 
-        data.extend_from_slice(b"\r\n");
         assert_eq!(decode_all_at_once(&payload), data);
     }
 
@@ -203,7 +196,6 @@ mod tests {
             payload.extend_from_slice(piece.as_bytes());
             payload.extend_from_slice(b"\r\n");
             expected.extend_from_slice(piece.as_bytes());
-            expected.extend_from_slice(b"\r\n");
         }
         payload.extend_from_slice(b"0\r\n\r\n");
 
@@ -238,7 +230,7 @@ mod tests {
         let payload = b"5\r\nhello\r\n";
         let mut decoder = ChunkedDecoder::new();
         assert!(decoder.decode(payload).is_ok());
-        assert_eq!(decoder.get_processed_chunk(None), b"hello\r\n");
+        assert_eq!(decoder.get_processed_chunk(None), b"hello");
     }
 
     #[test]

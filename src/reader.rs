@@ -150,7 +150,7 @@ mod test {
         let payload = b"1b\r\n012345678901234567890123452\r\n0\r\n\r\n";
         let mut decoder_reader = Decoder::new(payload.as_ref());
 
-        let expected = b"012345678901234567890123452\r\n".to_vec();
+        let expected = b"012345678901234567890123452".to_vec();
         let mut first_part = vec![0u8; 2];
         let mut final_part = vec![];
 
@@ -172,7 +172,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"hello\r\n");
+        assert_eq!(out, b"hello");
     }
 
     #[test]
@@ -181,7 +181,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"Mozilla\r\nDeveloper\r\nNetwork\r\n");
+        assert_eq!(out, b"MozillaDeveloperNetwork");
     }
 
     #[test]
@@ -190,7 +190,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut s = String::new();
         decoder.read_to_string(&mut s).unwrap();
-        assert_eq!(s, "hello world\r\n");
+        assert_eq!(s, "hello world");
     }
 
     #[test]
@@ -216,7 +216,7 @@ mod test {
         // Subsequent reads should continue normally
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"hello\r\n");
+        assert_eq!(out, b"hello");
     }
 
     #[test]
@@ -234,13 +234,13 @@ mod test {
             out.push(one_byte[0]);
         }
 
-        assert_eq!(out, b"Wiki\r\npedia\r\n");
+        assert_eq!(out, b"Wikipedia");
     }
 
     #[test]
     fn test_various_buffer_sizes() {
         let payload = b"7\r\nMozilla\r\n9\r\nDeveloper\r\n7\r\nNetwork\r\n0\r\n\r\n";
-        let expected = b"Mozilla\r\nDeveloper\r\nNetwork\r\n";
+        let expected = b"MozillaDeveloperNetwork";
 
         for buf_size in [1, 2, 3, 4, 5, 7, 8, 11, 16, 32, 64, 128] {
             let mut decoder = Decoder::new(payload.as_ref());
@@ -266,7 +266,7 @@ mod test {
         let mut large_buf = vec![0u8; 8192];
 
         let n = decoder.read(&mut large_buf).unwrap();
-        assert_eq!(&large_buf[..n], b"hello\r\n");
+        assert_eq!(&large_buf[..n], b"hello");
 
         // Next read should return 0 (EOF)
         let n2 = decoder.read(&mut large_buf).unwrap();
@@ -278,11 +278,11 @@ mod test {
         let payload = b"5\r\nhello\r\n0\r\n\r\n";
         let mut decoder = Decoder::new(payload.as_ref());
         // Expected output length is 7 ("hello\r\n")
-        let mut exact_buf = vec![0u8; 7];
+        let mut exact_buf = vec![0u8; 5];
 
         let n = decoder.read(&mut exact_buf).unwrap();
-        assert_eq!(n, 7);
-        assert_eq!(&exact_buf[..n], b"hello\r\n");
+        assert_eq!(n, 5);
+        assert_eq!(&exact_buf[..n], b"hello");
 
         let n2 = decoder.read(&mut exact_buf).unwrap();
         assert_eq!(n2, 0);
@@ -294,7 +294,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"hello\r\n");
+        assert_eq!(out, b"hello");
     }
 
     #[test]
@@ -303,7 +303,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"0123456789\r\n0123456789A\r\n");
+        assert_eq!(out, b"01234567890123456789A");
     }
 
     #[test]
@@ -319,7 +319,6 @@ mod test {
         decoder.read_to_end(&mut out).unwrap();
 
         let mut expected = data.to_vec();
-        expected.extend_from_slice(b"\r\n");
         assert_eq!(out, expected);
     }
 
@@ -336,7 +335,6 @@ mod test {
         decoder.read_to_end(&mut out).unwrap();
 
         let mut expected = data;
-        expected.extend_from_slice(b"\r\n");
         assert_eq!(out, expected);
     }
 
@@ -352,7 +350,6 @@ mod test {
             payload.extend_from_slice(b"\r\n");
 
             expected.extend_from_slice(chunk.as_bytes());
-            expected.extend_from_slice(b"\r\n");
         }
         payload.extend_from_slice(b"0\r\n\r\n");
 
@@ -369,7 +366,7 @@ mod test {
         let mut decoder = Decoder::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"hey\r\n");
+        assert_eq!(out, b"hey");
 
         let mut buf = [0u8; 10];
         for _ in 0..5 {
@@ -385,7 +382,7 @@ mod test {
 
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"hello\r\nworld\r\n");
+        assert_eq!(out, b"helloworld");
     }
 
     #[test]
@@ -398,7 +395,7 @@ mod test {
             let mut out = Vec::new();
             decoder.read_to_end(&mut out).unwrap();
             assert_eq!(
-                out, b"Mozilla\r\nDeveloper\r\n",
+                out, b"MozillaDeveloper",
                 "Failed with input chunk size {}",
                 chunk_size
             );
@@ -412,7 +409,7 @@ mod test {
         let mut decoder = Decoder::new(cursor);
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"test\r\n");
+        assert_eq!(out, b"test");
     }
 
     #[test]
@@ -422,7 +419,7 @@ mod test {
         let mut decoder: DecoderReader<&[u8]> = DecoderReader::new(payload.as_ref());
         let mut out = Vec::new();
         decoder.read_to_end(&mut out).unwrap();
-        assert_eq!(out, b"rust\r\n");
+        assert_eq!(out, b"rust");
     }
 
     // --- Error checking tests ---

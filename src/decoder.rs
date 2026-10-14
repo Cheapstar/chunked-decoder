@@ -72,10 +72,10 @@ impl ChunkedDecoder {
     /// # NOTE : This only removes the line containing `chunk_size` nothing else.
     ///
     ///     chunk_size\r\n                 
-    ///     chunk\r\n                        chunk\r\n
-    ///     chunk_size\r\n                   chunk\r\n
-    ///     chunk\r\n               =>       chunk\r\n
-    ///     chunk_size\r\n                   chunk\r\n
+    ///     chunk\r\n                        
+    ///     chunk_size\r\n                   
+    ///     chunk\r\n               =>       chunkchunkchunkchunk
+    ///     chunk_size\r\n                   
     ///     chunk\r\n
     ///     chunk_size\r\n
     ///     chunk\r\n
@@ -179,7 +179,6 @@ impl ChunkedDecoder {
 
                 self.state = ChunkedDecoderState::ChunkSize;
 
-                self.processed_chunk.extend_from_slice(b"\r\n");
                 index += 2; // start of the chunk
             }
         }
