@@ -40,6 +40,7 @@ impl<W: Write> Write for Encoder<W> {
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
+        self.w.write_all(b"0\r\n\r\n")?;
         Ok(())
     }
 }
@@ -53,12 +54,13 @@ mod test {
     #[test]
     fn works_correctly() {
         let payload = b"1234567890";
-        let expected = b"0a\r\n1234567890\r\n";
+        let expected = b"0a\r\n1234567890\r\n0\r\n\r\n";
 
         let mut result = vec![];
         let mut encoder = encoder::writer::Encoder::new(&mut result);
 
         let read_bytes = encoder.write(payload).unwrap();
+        encoder.flush();
 
         assert_eq!(&result, expected);
     }

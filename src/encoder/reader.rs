@@ -3,11 +3,15 @@ use std::{io::Read, vec};
 /// Read the chunk from underlying reader and encode it
 pub struct Encoder<R: Read> {
     r: R,
+    reached_end: bool,
 }
 
 impl<R: Read> Encoder<R> {
     pub fn new(r: R) -> Self {
-        Self { r: r }
+        Self {
+            r: r,
+            reached_end: false,
+        }
     }
 }
 
@@ -16,6 +20,11 @@ impl<R: Read> Read for Encoder<R> {
         // minimum of 1 bytes will be taken by hexadecimal string chunk_size plus 2 more for crlf and 2 more at the end of chunk
         if buf.len() < 6 {
             return Ok(0);
+        }
+
+        if self.reached_end {
+            buf[0..5].copy_from_slice(b"0\r\n\r\n");
+            return Ok(5);
         }
 
         // We will determine the maximum chunk_size that can be filled in the buffer before processing here.
@@ -58,6 +67,7 @@ impl<R: Read> Read for Encoder<R> {
             let returned_bytes = self.r.read(&mut chunk[(req_chunk_size - req_size)..])?;
 
             if returned_bytes == 0 {
+                self.reached_end = true;
                 break;
             }
             req_size -= returned_bytes;
@@ -79,6 +89,13 @@ impl<R: Read> Read for Encoder<R> {
         buf[chunk_size_len + 2 + chunk_size..chunk_size_len + 2 + chunk_size + 2]
             .copy_from_slice(b"\r\n");
 
+        if self.reached_end && (buf.len() - chunk_size + chunk_size_len + 4 >= 5) {
+            let end_index = chunk_size_len + 2 + chunk_size + 2;
+            buf[end_index..end_index + 5].copy_from_slice(b"0\r\n\r\n");
+
+            return Ok(end_index + 5);
+        }
+
         Ok(chunk_size + 4 + chunk_size_len)
     }
 }
@@ -92,11 +109,11 @@ mod test {
     #[test]
     fn works_correctly() {
         let payload = b"1234567890";
-        let expected = b"0a\r\n1234567890\r\n";
+        let expected = b"0a\r\n1234567890\r\n0\r\n\r\n";
 
         let mut encoder = encoder::reader::Encoder::new(&payload[..]);
 
-        let mut buf = vec![0u8; 16];
+        let mut buf = vec![0u8; 21];
         let read_bytes = encoder.read(&mut buf).unwrap();
 
         assert_eq!(&buf[0..read_bytes], expected);
